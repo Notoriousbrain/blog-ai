@@ -4,7 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 
-export default async function BlogPage({ params }: { params: { id: string } }) {
+export default async function BlogPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const blog = await getBlogByIdServer(id);
 

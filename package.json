@@ -13,6 +13,7 @@
     "@ai-sdk/gateway": "^2.0.18",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@vercel/analytics": "^1.6.1",
     "ai": "^5.0.106",
     "axios": "^1.13.2",
     "better-auth": "^1.4.5",
