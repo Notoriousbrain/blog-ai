@@ -3,9 +3,12 @@ import { db } from "@/src/db";
 import { blogs } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(req: Request, ctx: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = ctx.params;
+    const { id } = await params;
 
     const [blog] = await db
       .select()

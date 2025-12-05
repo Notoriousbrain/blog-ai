@@ -4,13 +4,32 @@ import { aiGatewayChat, aiGatewayImage } from "@/src/lib/ai-gateway";
 import { CreateBlogInputType } from "@/src/types";
 import { desc, eq } from "drizzle-orm";
 
+async function getUniqueSlug(base: string) {
+  let slug = base;
+  let counter = 1;
+
+  while (true) {
+    const exists = await db
+      .select({ id: blogs.id })
+      .from(blogs)
+      .where(eq(blogs.slug, slug))
+      .limit(1);
+
+    if (exists.length === 0) return slug;
+
+    slug = `${base}-${counter}`;
+    counter++;
+  }
+}
+
 export async function createDraftBlogRecord(input: CreateBlogInputType) {
+  const uniqueSlug = await getUniqueSlug(input.slug);
   const [blog] = await db
     .insert(blogs)
     .values({
       userId: input.userId,
       title: input.title,
-      slug: input.slug,
+      slug: uniqueSlug,
       content: "",
       status: "draft",
       metadata: {
@@ -106,7 +125,7 @@ async function humanRewriteLoop(content: string) {
   let current = content;
   let pass = 0;
 
-  while (pass < 4) {
+  while (pass < 3) {
     const rewritten = await aiGatewayChat([
       {
         role: "system",
@@ -115,39 +134,24 @@ async function humanRewriteLoop(content: string) {
       {
         role: "user",
         content: `Rewrite the article with these rules:
-                    - No em dashes.
-                    - No "However", "Moreover", "In addition", "Therefore".
-                    - Use simple everyday English.
-                    - Use only short and medium sentences.
-                    - Do not repeat structures.
-                    - Remove generic filler.
-                    - Keep the meaning.
+          - Expand the content to roughly **2x the original length**
+          - Break it into **3-4 paragraphs**, each with solid size (3-5 sentences)
+          - Use simple, everyday English
+          - Avoid filler words and AI-sounding phrasing
+          - No "However", "Moreover", "In addition", "Therefore"
+          - No em dashes
+          - Keep the original meaning, but explain ideas more fully
+          - Improve transitions and readability
+          - Add natural spacing between paragraphs
+          - Return ONLY the rewritten article text. Do NOT return JSON
 
-                    Return JSON like:
-                    {
-                      "text": "...",
-                      "score": 1-10
-                    }
-
-                    ARTICLE:${current}
-                  `.trim(),
+          ARTICLE:
+          ${current}
+          `.trim(),
       },
     ]);
 
-    let updated = current;
-    let score = 5;
-
-    try {
-      const parsed = JSON.parse(rewritten);
-      updated = parsed.text ?? updated;
-      score = Number(parsed.score);
-    } catch {
-      updated = rewritten;
-    }
-
-    current = updated;
-
-    if (score >= 8) break;
+    current = rewritten.trim();
     pass++;
   }
 
@@ -168,11 +172,11 @@ async function generateReadableBlog(params: {
     {
       role: "user",
       content: `Write an outline. Keep it simple (3-7 sections).
-                Title: ${title}
+        Title: ${title}
 
-                Source material: ${sources}
+        Source material: ${sources}
 
-                Return JSON: { "outline": ["...", "..."] }
+        Return JSON: { "outline": ["...", "..."] }
       `.trim(),
     },
   ]);
@@ -195,11 +199,11 @@ async function generateReadableBlog(params: {
       role: "user",
       content: `Topic: ${title}
                 
-                Outline: ${outline.map((x, i) => `${i + 1}. ${x}`).join("\n")}
+        Outline: ${outline.map((x, i) => `${i + 1}. ${x}`).join("\n")}
                 
-                Source: ${sources}
+        Source: ${sources}
                 
-                Write a natural, simple article. No title. No metadata.
+        Write a natural, simple article. No title. No metadata.
       `.trim(),
     },
   ]);
@@ -219,7 +223,16 @@ export async function generateBlogForId(blogId: string) {
     sources,
   });
 
-  const heroPrompt = `Cinematic 16:9 photo that represents: ${blog.title}. No text, realistic, editorial style.`;
+  const heroPrompt = `Generate a cinematic 16:9 photograph representing this topic: "${blog.title}"
+
+     Rules:
+     - No text
+     - Realistic
+     - Editorial photography
+     - Horizontal composition
+     - aspect_ratio: 16:9
+    `;
+
   const heroImageUrl = await aiGatewayImage(heroPrompt);
 
   await db.insert(blogVersions).values({

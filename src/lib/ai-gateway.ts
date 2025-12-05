@@ -1,59 +1,45 @@
-import { AxiosError } from "axios";
-import { ChatMessageType } from "../types";
-import { aiClient } from "./axios";
+import { generateText } from "ai";
+import { createGateway } from "@ai-sdk/gateway";
 
-const apiUrl = process.env.AI_GATEWAY_URL || "";
-const apiKey = process.env.AI_GATEWAY_API_KEY || "";
-const imgUrl = process.env.AI_GATEWAY_IMAGE_URL || "";
+export type ChatMessageType = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
+const gateway = createGateway({
+  apiKey: process.env.AI_GATEWAY_API_KEY,
+  baseURL: "https://ai-gateway.vercel.sh/v1/ai",
+});
 
 const chatModel = "anthropic/claude-opus-4.5";
-const imageModel = "google/gemini-3-pro-image";
+const imageModel = "google/gemini-2.5-flash-image";
 
 export async function aiGatewayChat(messages: ChatMessageType[]) {
-  if (!apiUrl || !apiKey) {
-    throw new Error("AI Gateway environment variables not configured");
-  }
+  const prompt = messages.map((m) => `${m.role}: ${m.content}`).join("\n\n");
 
-  try {
-    const res = await aiClient.post(apiUrl, {
-      model: chatModel,
-      messages,
-      temperature: 0.85,
-    });
+  const result = await generateText({
+    model: gateway(chatModel),
+    prompt,
+    temperature: 0.8,
+  });
 
-    const content = res.data?.choices?.[0]?.message?.content;
-
-    if (!content || typeof content !== "string") {
-      throw new Error("AI Gateway returned an empty response");
-    }
-
-    return content.trim();
-  } catch (err: unknown) {
-    console.error(
-      "[AI Chat Error]",
-      (err as AxiosError).response?.data || (err as AxiosError).message
-    );
-    throw new Error("AI chat request failed");
-  }
+  return result.text;
 }
 
 export async function aiGatewayImage(prompt: string) {
-  if (!imgUrl) return null;
+  const result = await generateText({
+    model: gateway(imageModel),
+    prompt,
+  });
 
-  try {
-    const res = await aiClient.post(imgUrl, {
-      model: imageModel,
-      prompt,
-      size: "1024x1024",
-    });
+  const imageFiles = result.files.filter((f) =>
+    f.mediaType?.startsWith("image/")
+  );
 
-    const url = res.data?.data?.[0]?.url;
-    return typeof url === "string" ? url : null;
-  } catch (err: unknown) {
-    console.error(
-      "[AI Image Error]",
-      (err as AxiosError).response?.data || (err as AxiosError).message
-    );
-    return null;
-  }
+  if (imageFiles.length === 0) return null;
+
+  const file = imageFiles[0];
+  const base64 = Buffer.from(file.uint8Array).toString("base64");
+
+  return `data:${file.mediaType};base64,${base64}`;
 }

@@ -16,6 +16,15 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
     );
   }
 
+  function formatBlogHtml(text: string) {
+    const paragraphs = text
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    return paragraphs.map((p) => `<p>${p}</p>`).join("\n\n");
+  }
+
   return (
     <>
       <Header />
@@ -48,8 +57,8 @@ export default async function BlogPage({ params }: { params: { id: string } }) {
         )}
 
         <article
-          className="prose prose-neutral dark:prose-invert max-w-none leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: blog.content }}
+          className="prose prose-neutral dark:prose-invert leading-relaxed prose-headings:font-semibold prose-headings:mt-10 prose-headings:mb-4 prose-img:rounded-lg [&>p]:text-[17px] [&>p]:leading-[1.7] [&>p]:mb-6 [&>p]:mt-6 [&>p]:text-balance mx-auto"
+          dangerouslySetInnerHTML={{ __html: formatBlogHtml(blog.content) }}
         />
       </div>
     </>

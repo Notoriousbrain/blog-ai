@@ -8,29 +8,44 @@ import { eq } from "drizzle-orm";
 import { http } from "@/src/lib/axios";
 
 export async function POST(req: Request) {
-  const session = await auth.api.getSession();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await auth.api.getSession({
+      headers: req.headers,
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+
+    const draft = await createDraftBlogRecord({
+      userId: session.user.id,
+      title: body.title,
+      slug: slugify(body.title),
+      urls: body.urls ?? [],
+      rawText: body.rawText ?? "",
+      tags: body.tags ?? [],
+      category: body.category ?? "",
+    });
+
+    await db
+      .update(blogs)
+      .set({ status: "generating" })
+      .where(eq(blogs.id, draft.id));
+
+    const origin = new URL(req.url).origin;
+
+    http
+      .post(`${origin}/api/blogs/generate`, { blogId: draft.id }, { timeout: 0})
+      .catch((err) => console.error("BACKGROUND GENERATE ERROR:", err));
+
+    return NextResponse.json(draft);
+  } catch (err) {
+    console.error("CREATE BLOG ERROR:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error", details: String(err) },
+      { status: 500 }
+    );
   }
-
-  const body = await req.json();
-
-  const draft = await createDraftBlogRecord({
-    userId: session.user.id,
-    title: body.title,
-    slug: slugify(body.title),
-    urls: body.urls ?? [],
-    rawText: body.rawText ?? "",
-    tags: body.tags ?? [],
-    category: body.category ?? "",
-  });
-
-  await db
-    .update(blogs)
-    .set({ status: "generating" })
-    .where(eq(blogs.id, draft.id));
-
-  http.post("/api/blogs/generate", { blogId: draft.id }).catch(() => {});
-
-  return NextResponse.json(draft);
 }

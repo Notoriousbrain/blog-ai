@@ -2,7 +2,8 @@ import Link from "next/link";
 import { auth } from "@/src/lib/auth";
 import { Button } from "./ui/button";
 import { headers } from "next/headers";
-import LogoutButton from "./logout-button";
+import SignoutButton from "./auth/signout-button";
+import SigninButton from "./auth/signin-button";
 
 export default async function Header() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -18,16 +19,14 @@ export default async function Header() {
 
         <nav className="flex items-center gap-4">
           {!isLoggedIn ? (
-            <Link href="/signin">
-              <Button variant="outline">Sign In</Button>
-            </Link>
+            <SigninButton />
           ) : (
             <>
               <Link href="/blog/create">
                 <Button>Create</Button>
               </Link>
 
-              <LogoutButton />
+              <SignoutButton />
             </>
           )}
         </nav>

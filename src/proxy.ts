@@ -7,24 +7,8 @@ export function proxy(request: NextRequest) {
   const session = getSessionCookie(request);
   const loggedIn = !!session;
 
-  if (
-    pathname === "/" ||
-    pathname.startsWith("/blog/") ||
-    pathname.startsWith("/api/") ||
-    pathname.startsWith("/about") ||
-    pathname.startsWith("/contact")
-  ) {
-    return NextResponse.next();
-  }
-
-  if (pathname === "/signin" && loggedIn) {
+  if (pathname === "/blog/create" && !loggedIn) {
     return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  if (pathname === "/blog/create") {
-    if (!loggedIn) {
-      return NextResponse.redirect(new URL("/signin", request.url));
-    }
   }
 
   return NextResponse.next();
