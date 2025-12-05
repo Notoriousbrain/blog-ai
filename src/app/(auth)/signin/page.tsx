@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/components/ui";
 import { authClient } from "@/src/lib/auth-client";
 
 export default function LoginPage() {

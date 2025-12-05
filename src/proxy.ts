@@ -2,26 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 export function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+  const { pathname } = request.nextUrl;
 
-  const sessionCookie = getSessionCookie(request);
-  const isLoggedIn = !!sessionCookie;
+  const session = getSessionCookie(request);
+  const loggedIn = !!session;
 
-  console.log("[PROXY]", pathname, "logged in:", isLoggedIn);
-
-  if (pathname === "/" || pathname.startsWith("/api/auth")) {
-    if (pathname === "/" && isLoggedIn) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
+  if (
+    pathname === "/" ||
+    pathname.startsWith("/blog/") ||
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/about") ||
+    pathname.startsWith("/contact")
+  ) {
     return NextResponse.next();
   }
 
-  if (pathname === "/signin" && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  if (pathname === "/signin" && loggedIn) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (pathname.startsWith("/dashboard")) {
-    if (!isLoggedIn) {
+  if (pathname === "/blog/create") {
+    if (!loggedIn) {
       return NextResponse.redirect(new URL("/signin", request.url));
     }
   }
