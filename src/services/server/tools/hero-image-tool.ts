@@ -9,9 +9,6 @@ export const heroImageTool = tool({
   }),
 
   execute: async ({ prompt }) => {
-    console.log("🖼️ [heroImageTool] Starting hero image generation...");
-    console.log("🖼️ [heroImageTool] Original prompt:", prompt);
-
     const enforcedPrompt = `
 Create a high-quality, realistic, non-AI-looking hero image.
 
@@ -25,8 +22,6 @@ Requirements:
 Theme: ${prompt}
 `;
 
-    console.log("🖼️ [heroImageTool] Enforced prompt:\n", enforcedPrompt);
-
     try {
       const imageResult = await aiGatewayImage(enforcedPrompt);
 
@@ -35,10 +30,7 @@ Theme: ${prompt}
         return null;
       }
 
-      console.log(
-        "✅ [heroImageTool] Image generated (first 200 chars):",
-        imageResult.substring(0, 200) + "..."
-      );
+      console.log(imageResult.substring(0, 200) + "...");
 
       return imageResult;
     } catch (err) {
