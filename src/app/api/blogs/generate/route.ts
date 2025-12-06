@@ -2,13 +2,21 @@ import { NextResponse } from "next/server";
 import { generateBlogForId } from "@/src/services/server/blog";
 
 export async function POST(req: Request) {
-  const { blogId } = await req.json();
+  try {
+    const { blogId } = await req.json();
 
-  if (!blogId) {
-    return NextResponse.json({ error: "Missing blogId" }, { status: 400 });
+    if (!blogId) {
+      return NextResponse.json({ error: "Missing blogId" }, { status: 400 });
+    }
+
+    const result = await generateBlogForId(blogId);
+
+    return NextResponse.json({ success: true, content: result });
+  } catch (err) {
+    console.error("GENERATE BLOG ERROR:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error", details: String(err) },
+      { status: 500 }
+    );
   }
-
-  const result = await generateBlogForId(blogId);
-
-  return NextResponse.json({ success: true, content: result });
 }

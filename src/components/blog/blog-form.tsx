@@ -27,7 +27,7 @@ export default function BlogForm() {
 
     const check = async () => {
       const data = await getBlogById(id);
-      if (data.status === "published") {
+      if (data?.status === "published") {
         setGenerating(false);
         alert("Blog generated!");
         window.location.href = `/blog/${id}`;

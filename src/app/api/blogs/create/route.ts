@@ -19,6 +19,10 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
+    if (!body.title || typeof body.title !== "string") {
+      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    }
+
     const draft = await createDraftBlogRecord({
       userId: session.user.id,
       title: body.title,
@@ -37,7 +41,11 @@ export async function POST(req: Request) {
     const origin = new URL(req.url).origin;
 
     http
-      .post(`${origin}/api/blogs/generate`, { blogId: draft.id }, { timeout: 0})
+      .post(
+        `${origin}/api/blogs/generate`,
+        { blogId: draft.id },
+        { timeout: 0 }
+      )
       .catch((err) => console.error("BACKGROUND GENERATE ERROR:", err));
 
     return NextResponse.json(draft);
