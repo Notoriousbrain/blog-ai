@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { getAllBlogsServer } from "@/src/services/server/blog";
 import Link from "next/link";
 import Header from "../components/header";
+import { getAllBlogsServer } from "../services/server/blog/get-all-blogs";
 
 export default async function Home() {
   const blogs = await getAllBlogsServer();

@@ -1,6 +1,7 @@
 import Header from "@/src/components/header";
-import { getBlogByIdServer } from "@/src/services/server/blog";
+import { getBlogByIdServer } from "@/src/services/server/blog/get-blog-by-id";
 import Image from "next/image";
+import { marked } from "marked";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 
@@ -20,13 +21,8 @@ export default async function BlogPage({
     );
   }
 
-  function formatBlogHtml(text: string) {
-    const paragraphs = text
-      .split(/\n\s*\n/)
-      .map((p) => p.trim())
-      .filter(Boolean);
-
-    return paragraphs.map((p) => `<p>${p}</p>`).join("\n\n");
+  function formatBlogHtml(markdown: string) {
+    return marked(markdown);
   }
 
   return (

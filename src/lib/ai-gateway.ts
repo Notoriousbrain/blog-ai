@@ -6,29 +6,17 @@ export type ChatMessageType = {
   content: string;
 };
 
-const gateway = createGateway({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
+export const gateway = createGateway({
+  apiKey: process.env.AI_GATEWAY_API_KEY!,
   baseURL: "https://ai-gateway.vercel.sh/v1/ai",
 });
 
-const chatModel = "anthropic/claude-opus-4.5";
-const imageModel = "google/gemini-2.5-flash-image";
+export const CHAT_MODEL_ID = "openai/gpt-4.1";
+export const IMAGE_MODEL_ID = "google/gemini-2.5-flash-image";
 
-export async function aiGatewayChat(messages: ChatMessageType[]) {
-  const prompt = messages.map((m) => `${m.role}: ${m.content}`).join("\n\n");
-
+export async function aiGatewayImage(prompt: string): Promise<string | null> {
   const result = await generateText({
-    model: gateway(chatModel),
-    prompt,
-    temperature: 0.8,
-  });
-
-  return result.text;
-}
-
-export async function aiGatewayImage(prompt: string) {
-  const result = await generateText({
-    model: gateway(imageModel),
+    model: gateway(IMAGE_MODEL_ID),
     prompt,
   });
 

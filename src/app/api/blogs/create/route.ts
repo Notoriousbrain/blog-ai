@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/src/lib/auth";
 import { slugify } from "@/src/lib/slugify";
-import { createDraftBlogRecord } from "@/src/services/server/blog";
 import { db } from "@/src/db";
 import { blogs } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { http } from "@/src/lib/axios";
+import { createDraftBlogRecord } from "@/src/services/server/blog/create-draft-blog-record";
 
 export async function POST(req: Request) {
   try {
