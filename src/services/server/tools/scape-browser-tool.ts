@@ -32,7 +32,6 @@ export const scrapeBrowserTool = tool({
       const sessionWS = session as BrowserBaseSessionWS;
 
       const wsUrl = sessionWS.ws_url || sessionWS.live_urls?.ws || null;
-
       if (!wsUrl) return null;
 
       const browser = await playwright.chromium.connect(wsUrl);
@@ -40,18 +39,34 @@ export const scrapeBrowserTool = tool({
 
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-      const raw = await page.evaluate(() => {
+      const scraped = await page.evaluate(() => {
         const getText = (sel: string) =>
           Array.from(document.querySelectorAll(sel))
             .map((el) => (el as HTMLElement).innerText)
             .join("\n");
 
-        return (
-          getText("article") || getText("main") || document.body.innerText || ""
-        );
+        const images = Array.from(document.querySelectorAll("img"))
+          .map((img) => {
+            return (
+              img.src ||
+              img.getAttribute("data-src") ||
+              img.getAttribute("data-lazy-src")
+            );
+          })
+          .filter((src) => src && src.length > 5)
+          .filter((src) => !src?.startsWith("data:")); 
+
+        return {
+          text:
+            getText("article") ||
+            getText("main") ||
+            document.body.innerText ||
+            "",
+          images,
+        };
       });
 
-      const cleaned = normalizeExtractedText(raw);
+      const cleanedText = normalizeExtractedText(scraped.text);
       const title = await page.title();
 
       const metaDesc = await page.evaluate(() => {
@@ -62,17 +77,27 @@ export const scrapeBrowserTool = tool({
         );
       });
 
-      const text =
-        cleaned.length > 40 ? cleaned : metaDesc.length > 20 ? metaDesc : "";
+      const finalText =
+        cleanedText.length > 40
+          ? cleanedText
+          : metaDesc.length > 20
+          ? metaDesc
+          : "";
 
       await browser.close();
 
-      if (!text) {
+      if (!finalText) {
         return { error: "SCRAPE_FAILED" };
       }
 
-      return { url, title, text };
-    } catch {
+      return {
+        url,
+        title,
+        text: finalText,
+        images: scraped.images,
+      };
+    } catch (err) {
+      console.error("SCRAPE ERROR:", err);
       return null;
     }
   },

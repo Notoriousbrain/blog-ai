@@ -37,9 +37,6 @@ export default async function Home() {
 
                 <div className="p-4">
                   <h2 className="font-medium text-lg mb-1">{b.title}</h2>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {b.excerpt || "No excerpt available."}
-                  </p>
                 </div>
               </Link>
             ))}

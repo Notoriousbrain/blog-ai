@@ -15,19 +15,26 @@ export const CHAT_MODEL_ID = "openai/gpt-4.1";
 export const IMAGE_MODEL_ID = "google/gemini-2.5-flash-image";
 
 export async function aiGatewayImage(prompt: string): Promise<string | null> {
-  const result = await generateText({
-    model: gateway(IMAGE_MODEL_ID),
-    prompt,
-  });
+  try {
+    const result = await generateText({
+      model: gateway(IMAGE_MODEL_ID),
+      prompt,
+    });
 
-  const imageFiles = result.files.filter((f) =>
-    f.mediaType?.startsWith("image/")
-  );
+    const imageFiles = result.files.filter((f) =>
+      f.mediaType?.startsWith("image/")
+    );
+    console.log(imageFiles, "img files");
 
-  if (imageFiles.length === 0) return null;
+    if (imageFiles.length === 0) return null;
 
-  const file = imageFiles[0];
-  const base64 = Buffer.from(file.uint8Array).toString("base64");
+    const file = imageFiles[0];
+    const base64 = Buffer.from(file.uint8Array).toString("base64");
+    console.log(`data:${file.mediaType};base64,${base64}`);
 
-  return `data:${file.mediaType};base64,${base64}`;
+    return `data:${file.mediaType};base64,${base64}`;
+  } catch (err) {
+    console.error("❌ aiGatewayImage ERROR (raw):", err);
+    return null;
+  }
 }

@@ -9,6 +9,9 @@ export const heroImageTool = tool({
   }),
 
   execute: async ({ prompt }) => {
+    console.log("🖼️ [heroImageTool] Starting hero image generation...");
+    console.log("🖼️ [heroImageTool] Original prompt:", prompt);
+
     const enforcedPrompt = `
 Create a high-quality, realistic, non-AI-looking hero image.
 
@@ -22,6 +25,32 @@ Requirements:
 Theme: ${prompt}
 `;
 
-    return await aiGatewayImage(enforcedPrompt);
+    console.log("🖼️ [heroImageTool] Enforced prompt:\n", enforcedPrompt);
+
+    try {
+      const imageResult = await aiGatewayImage(enforcedPrompt);
+
+      if (!imageResult) {
+        console.error("❌ [heroImageTool] aiGatewayImage() returned NULL.");
+        return null;
+      }
+
+      console.log(
+        "✅ [heroImageTool] Image generated (first 200 chars):",
+        imageResult.substring(0, 200) + "..."
+      );
+
+      return imageResult;
+    } catch (err) {
+      console.error("💥 [heroImageTool] ERROR during image generation:", err);
+
+      if (err instanceof Promise) {
+        console.error("🔍 [heroImageTool] Error is a Promise — awaiting...");
+        const inner = await err.catch((e) => e);
+        console.error("🔍 [heroImageTool] Unwrapped error:", inner);
+      }
+
+      return null;
+    }
   },
 });

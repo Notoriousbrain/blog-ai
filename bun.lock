@@ -5,6 +5,7 @@
       "name": "blog-ai",
       "dependencies": {
         "@ai-sdk/gateway": "^2.0.0-beta.72",
+        "@ai-sdk/openai": "^2.0.77",
         "@browserbasehq/sdk": "^2.6.0",
         "@radix-ui/react-label": "^2.1.8",
         "@radix-ui/react-slot": "^1.2.4",
@@ -44,6 +45,8 @@
   },
   "packages": {
     "@ai-sdk/gateway": ["@ai-sdk/gateway@2.0.0-beta.72", "", { "dependencies": { "@ai-sdk/provider": "3.0.0-beta.24", "@ai-sdk/provider-utils": "4.0.0-beta.43", "@vercel/oidc": "3.0.5" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-5Lw5KoI6Xt51fiQcWUcgnQr1WssnqWcPoBHL3Urt2qDgayVZhVf4G5n232MzpSesJHCwoYSUprDaAKkzrYeDAQ=="],
+
+    "@ai-sdk/openai": ["@ai-sdk/openai@2.0.77", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.18" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-lEJ9vyWSU5VLo+6Msr6r32RnABf4SRxPSV3Hz1Yb5yt43bWYxbBzwaDNYGhJaDL6rCgfUVvcIf5TKiiEuVd4EQ=="],
 
     "@ai-sdk/provider": ["@ai-sdk/provider@3.0.0-beta.24", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-lYBjT2+8+2auq1mUs5oMrQs4O9COzHty/QukjrjBLRjkmeb9WeTQVVi0oeEGXf3yTdeY2eSwYOdz+H4zRHsacg=="],
 
@@ -1126,6 +1129,10 @@
     "zod": ["zod@4.1.13", "", {}, "sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig=="],
 
     "zod-validation-error": ["zod-validation-error@4.0.2", "", { "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" } }, "sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ=="],
+
+    "@ai-sdk/openai/@ai-sdk/provider": ["@ai-sdk/provider@2.0.0", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA=="],
+
+    "@ai-sdk/openai/@ai-sdk/provider-utils": ["@ai-sdk/provider-utils@3.0.18", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@standard-schema/spec": "^1.0.0", "eventsource-parser": "^3.0.6" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-ypv1xXMsgGcNKUP+hglKqtdDuMg68nWHucPPAhIENrbFAI+xCHiqPVN8Zllxyv1TNZwGWUghPxJXU+Mqps0YRQ=="],
 
     "@babel/core/json5": ["json5@2.2.3", "", { "bin": { "json5": "lib/cli.js" } }, "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="],
 

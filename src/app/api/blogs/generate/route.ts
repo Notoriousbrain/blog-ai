@@ -22,12 +22,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    // 🔥 Run agent
     const result = await generateBlog(blog.title);
 
     const now = new Date();
 
-    // Store version
     await db.insert(blogVersions).values({
       blogId,
       versionNumber: "v1",
@@ -39,24 +37,28 @@ export async function POST(req: Request) {
       },
     });
 
-    // Update main blog record
     await db
       .update(blogs)
       .set({
         content: result.article,
-        heroImage: result.scrapedImages?.[0]?.url ?? null,
+        heroImage:
+          typeof result.heroImageUrl === "string"
+            ? result.heroImageUrl
+            : result.heroImageUrl?.url ?? null,
         status: "published",
         updatedAt: now,
         publishedAt: blog.publishedAt ?? now,
       })
       .where(eq(blogs.id, blogId));
 
-    // Save hero image if available
-    if (result.scrapedImages?.[0]?.url) {
+    if (result.heroImageUrl) {
       await db.insert(blogImages).values({
         blogId,
-        imageUrl: result.scrapedImages[0].url,
-        prompt: result.heroImagePrompt,
+        imageUrl:
+          typeof result.heroImageUrl === "string"
+            ? result.heroImageUrl
+            : result.heroImageUrl.url,
+        prompt: result.heroImagePrompt ?? null,
         alt: blog.title,
       });
     }
